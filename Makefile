@@ -30,7 +30,7 @@ esp: boot
 run: esp
 	@test -r "$(OVMF_CODE)" || { echo "OVMF firmware not found: $(OVMF_CODE) (set OVMF_CODE=...)"; exit 1; }
 	@echo "==> Starting QEMU with OVMF ($(OVMF_CODE))"
-	@$(QEMU) -machine q35 -m 256M -drive if=pflash,format=raw,unit=0,file=$(OVMF_CODE),readonly=on -drive format=raw,file=fat:rw:$(ESP_DIR)
+	@$(QEMU) --enable-kvm -m 512M -drive if=pflash,format=raw,unit=0,file=$(OVMF_CODE),readonly=on -drive format=raw,file=fat:rw:$(ESP_DIR) -cpu host
 
 clean:
 	@echo "==> Cleaning build artifacts and ESP"
