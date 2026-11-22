@@ -11,9 +11,13 @@ SOURCE_FILES := $(shell find . -path './boot/gnu-efi' -prune -o \
 	-name '*.cxx' -o -name '*.h' -o -name '*.hh' -o -name '*.hpp' -o \
 	-name '*.hxx' \) \) -print)
 
-.PHONY: all boot esp run clean fmt
+.PHONY: all boot kernel esp run clean fmt
 
 all: esp
+
+kernel:
+	@echo "==> Building SaltKrnl"
+	@$(MAKE) --no-print-directory -C kernel all CXX=$(CXX) CC=$(CC)
 
 boot:
 	@echo "==> Building UEFI Booter"
@@ -23,14 +27,15 @@ fmt:
 	@echo "==> Formatting source files"
 	@$(CLANG_FORMAT) -i $(SOURCE_FILES)
 
-esp: boot
+
+esp: boot kernel
 	@echo "==> Preparing ESP at $(ESP_DIR)/"
 	@$(MAKE) --no-print-directory -C $(BOOT_DIR) install ESP_DIR=../$(ESP_DIR)
 
 run: esp
 	@test -r "$(OVMF_CODE)" || { echo "OVMF firmware not found: $(OVMF_CODE) (set OVMF_CODE=...)"; exit 1; }
 	@echo "==> Starting QEMU with OVMF ($(OVMF_CODE))"
-	@$(QEMU) --enable-kvm -m 512M -drive if=pflash,format=raw,unit=0,file=$(OVMF_CODE),readonly=on -drive format=raw,file=fat:rw:$(ESP_DIR) -cpu host
+	@$(QEMU) --enable-kvm -m 512M -drive if=pflash,format=raw,unit=0,file=$(OVMF_CODE),readonly=on -drive format=raw,file=fat:rw:$(ESP_DIR) -cpu host -serial stdio
 
 clean:
 	@echo "==> Cleaning build artifacts and ESP"

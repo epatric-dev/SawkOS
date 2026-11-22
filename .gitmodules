@@ -1,3 +1,6 @@
 [submodule "boot"]
 	path = boot
 	url = https://github.com/epatric-dev/BeachLoader.git
+[submodule "kernel"]
+	path = kernel
+	url = https://github.com/epatric-dev/SaltKrnl.git
